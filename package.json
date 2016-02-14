@@ -1,0 +1,17 @@
+{
+  "name": "redfish-node",
+  "version": "0.0.1",
+  "description": "Client library of redfish-v1.0",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "./node_modules/mocha/bin/mocha --recursive"
+  },
+  "dependencies": {
+    "superagent": "1.7.1",
+    "lodash": "^3.10.1"
+  },
+  "devDependencies": {
+    "mocha": "~2.3.4",
+    "expect.js": "~0.3.1"
+  }
+}
