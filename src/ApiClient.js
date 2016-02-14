@@ -219,9 +219,9 @@
     request.end(function(error, response) {
       if (callback) {
         var data = null;
-        if (!error) {
-          data = _this.deserialize(response, returnType);
-        }
+        //if (!error) {
+        //  data = _this.deserialize(response, returnType);
+        //}
         callback(error, data, response);
       }
     });

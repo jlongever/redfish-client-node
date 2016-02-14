@@ -26,6 +26,16 @@ listChassis = function() {
     });
 }
 
+listSystems = function() {
+    return redfish.listSystemsAsync()
+    .then(function(res) {
+        console.log(res[1].body);
+    })
+    .catch(function(err) {
+        throw err;  
+    });
+}
+
 listChassisThermal = function() {
     return redfish.listChassisAsync()
     .then(function(res) {
@@ -65,8 +75,57 @@ listChassisPower = function() {
         throw err;
     });
 }
-getServiceRoot();
-listChassis();
-listChassisThermal();
-listChassisPower();
+
+getChassis = function() {
+    return redfish.listChassisAsync()
+    .then(function(res) {
+        var body = res[1].body;
+        var membersList = body.Members;
+        return Promise.map(membersList, function(member) {
+            var id = member['@odata.id'].split('/redfish/v1/Chassis/')[1];
+            return redfish.getChassisAsync(id);
+        });
+    })
+    .then(function(res) {
+        _.forEach(res, function(item) {
+            console.log(item[1].body);
+        });
+    })
+    .catch(function(err) {
+	throw err;
+    });
+}
+
+getSystems = function() {
+    return redfish.listSystemsAsync()
+    .then(function(res) {
+        var body = res[1].body;
+        var membersList = body.Members;
+        return Promise.map(membersList, function(member) {
+            var id = member['@odata.id'].split('/redfish/v1/Systems/')[1];
+            return redfish.getSystemAsync(id);
+        });
+    })
+    .then(function(res) {
+        _.forEach(res, function(item) {
+            console.log(item[1].body);
+        });
+    })
+    .catch(function(err) {
+	throw err;
+    });
+}
+
+try {
+    getServiceRoot();
+    listChassis();
+    listChassisThermal();
+    listChassisPower();
+    getChassis();
+    listSystems();
+    getSystems();
+}
+catch(err) {
+    throw err;
+}
 
