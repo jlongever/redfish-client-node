@@ -1,83 +1,72 @@
 _ = require('lodash');
+Promise = require('bluebird');
 redfish = require('./src');
 
 api_client = new redfish.ApiClient();
 api_client.basePath = 'http://localhost:8080/redfish/v1'.replace(/\/+$/, '');;
-redfishApi = new redfish.RedfishvApi(api_client);
+redfish = Promise.promisifyAll(new redfish.RedfishvApi(api_client));
 
 getServiceRoot = function() {
-    redfishApi.getServiceRoot(function(err,data,response) {
-        if(err) {
-            console.log(err);
-            return;
-        }
-        if(response) {
-           console.log(response.body);
-       }
+    return redfish.getServiceRootAsync()
+    .then(function(res) {
+        console.log(res[1].body);
+    })
+    .catch(function(err) {
+        throw err;  
     });
 }
 
 listChassis = function() {
-    redfishApi.listChassis(function(err,data,response) {
-        if(err) {
-            console.log(err);
-            return;
-        }
-        if(response) {
-            console.log(response.body);
-        }
+    return redfish.listChassisAsync()
+    .then(function(res) {
+        console.log(res[1].body);
+    })
+    .catch(function(err) {
+        throw err;  
+    });
+}
+
+listChassisThermal = function() {
+    return redfish.listChassisAsync()
+    .then(function(res) {
+        var body = res[1].body;
+        var membersList = body.Members;
+        return Promise.map(membersList, function(member) {
+            var id = member['@odata.id'].split('/redfish/v1/Chassis/')[1];
+            return redfish.getThermalAsync(id);
+        });
+    })
+    .then(function(res) {
+        _.forEach(res, function(item) {
+            console.log(item[1].body);
+        });
+    })
+    .catch(function(err) {
+        throw err;
     });
 }
 
 listChassisPower = function() {
-    redfishApi.listChassis(function(err,data,response) {
-        if(err) {
-            console.log(err);
-            return;
-        }
-        if(response) {
-            var membersList = response.body.Members;
-            _.forEach(membersList, function(member) {
-                var id = member['@odata.id'].split('/redfish/v1/Chassis/')[1];
-                redfishApi.getPower(id, function(err,data,response) {
-                    if(err) {
-                        console.log(err);
-                        return;
-                    }
-                    if(response) {
-                        console.log(response.body);
-                    }
-                });
-            });
-        }
+    return redfish.listChassisAsync()
+    .then(function(res) {
+        var body = res[1].body;
+        var membersList = body.Members;
+        return Promise.map(membersList, function(member) {
+            var id = member['@odata.id'].split('/redfish/v1/Chassis/')[1];
+            return redfish.getPowerAsync(id);
+        });
+    })
+    .then(function(res) {
+        _.forEach(res, function(item) {
+            console.log(item[1].body);
+        });
+    })
+    .catch(function(err) {
+        throw err;
     });
-};
-listChassisThermal = function() {
-    redfishApi.listChassis(function(err,data,response) {
-        if(err) {
-            console.log(err);
-            return;
-        }
-        if(response) {
-            var membersList = response.body.Members;
-            _.forEach(membersList, function(member) {
-                var id = member['@odata.id'].split('/redfish/v1/Chassis/')[1];
-                redfishApi.getThermal(id, function(err,data,response) {
-                    if(err) {
-                        console.log(err);
-                        return;
-                    }
-                    if(response) {
-                        console.log(response.body);
-                    }
-                });
-            });
-        }
-    });
-};
-
+}
 getServiceRoot();
 listChassis();
-listChassisPower();
 listChassisThermal();
+listChassisPower();
 
