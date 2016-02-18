@@ -5,7 +5,6 @@ Redfish 1.0 Node.js client library
 See example.py for usage examples.
 
 ## Generating code
-
 ```
 sudo apt-get install -y maven
 git clone https://github.com/RackHD/on-http.git
